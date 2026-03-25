@@ -5,7 +5,13 @@ import matplotlib.pyplot as plt
 from scipy.optimize import fsolve
 from Geometry_define import area_definer # Assuming this remains the same
 
-
+'''
+This file is adapted from Gemini_gamma_pv_checked_mass_flow.py
+I created a function out of the mentioned file to simplify automation.
+The function takes as input T0, p0, and fluid.
+It outputs x, area, dens0, p, T, density, Mach, velocity (u), speed of sound, gamma_pv along the x-coordinate
+For now, the geometry of the problem (x and area) are read inside the function (ideally they are inputs too).
+'''
 def isentropic_relations_non_ideal(T0_C,p0_bar,fluid):
 
     T0 = T0_C + 273.15
@@ -92,7 +98,7 @@ def isentropic_relations_non_ideal(T0_C,p0_bar,fluid):
     # plt.title('Verification of Mass Conservation')
     # plt.legend()
 
-    # # --- 1. PREPARE ADIMENSIONAL VARIABLES ---
+    # # ---  PREPARE ADIMENSIONAL VARIABLES ---
     # # Ensure these are arrays derived from the solver results
     # p_ratio = P_arr / p0
     # T_arr = np.array([cp.PropsSI('T', 'S', s0, 'P', p_val, fluid) for p_val in P_arr])
@@ -102,7 +108,7 @@ def isentropic_relations_non_ideal(T0_C,p0_bar,fluid):
     # c_ratio = c_arr / cp.PropsSI('A', 'T', T0, 'P', p0, fluid)
     # area_ratio = A_star / area
 
-    # # --- 2. GENERATE THE PLOT ---
+    # # ---  GENERATE THE PLOT ---
     # plt.subplot(1,2,2)
 
     # # Plotting against Mach number (M_arr)

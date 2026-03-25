@@ -3,6 +3,11 @@ import matplotlib.pyplot as plt
 import os
 from scipy.signal import savgol_filter
 
+'''
+This file look into a root folder for the subfolders stated in the list.
+Extract the required information and plot it.
+'''
+
 root_folder = 'BOS_DEC_CORR_2025'
 
 sub_folders = {'BOS_12_5_1',

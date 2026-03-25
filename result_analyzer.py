@@ -4,6 +4,11 @@ import pandas as pd
 import os 
 import seaborn as sns
 
+'''
+This file use pandas and seaborn to perform data analysis of the results obtained from "Main_v1.py"
+'''
+
+
 # Load the dataset
 cwd = os.getcwd()
 

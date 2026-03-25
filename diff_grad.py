@@ -1,6 +1,14 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+''' 
+This file contains two functions:
+
+- diff: calculate the gradient of 'f' with respect to 'h' using forward, backward or central numerical scheme
+- diff02: calculate the gradient of 'f'with respect to 'h' using a 2nd order spatial accurate scheme
+
+'''
+
 def diff(f,h,method):
 
     grad = np.zeros_like(f)
@@ -45,9 +53,6 @@ def diff02(f,h):
     df[0] = -(3 * f[0] - 4 * f[1] + f[2]) / (h[2] - h[0] )
 
     # Central difference interior elements
-    # for i in range (1, len (f) - 1):
-    #     df[i] = (f[i + 1] - f[i - 1]) / (h[i + 1] - h[i - 1])
-
     df[1:-1] = (f[2:] - f[0:-2]) / (h[2:] - h[0:-2])
 
     # Backwards difference final element

@@ -16,9 +16,11 @@ import matplotlib.pyplot as plt
 from fourth_grad import gradientO4, gradientO4_fixed
 
 
-# Quasi 1-D code to obtain thermodynamic properties along a nozzle solving the area-Mach relation for an ideal gas
+# Quasi 1-D code to obtain thermodynamic properties along a nozzle solving the area-Mach relation for a non-ideal gas
+# It make use of the generalized isentropic equations from Negerstigt 2023.
 # Set the geometry through Geometry_define
 # USE REFPROP instad of HEOS
+
 
 x_old, area_old, dA_old = area_definer(1)
 # x = x_old

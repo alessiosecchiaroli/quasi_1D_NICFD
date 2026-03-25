@@ -6,6 +6,12 @@ import os
 from scipy.integrate import solve_bvp
 from scipy.optimize import fsolve
 
+'''
+This file, solve the isentropic relation in terms of density as a simple function of Mach.
+Gamma is given.
+Obviously it's not physical and it's only used to investigate the effect of gamma on the solution.
+''' 
+
 # Initial conditions
 T0 = 240  # C
 p0 = 10 # bar

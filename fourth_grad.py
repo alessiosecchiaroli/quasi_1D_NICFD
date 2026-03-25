@@ -3,7 +3,9 @@ import numpy as np
 
 # 4th order accurate gradient function based on 2nd order version from http://projects.scipy.org/scipy/numpy/browser/trunk/numpy/lib/function_base.py
 def gradientO4(f, *varargs):
-    """Calculate the fourth-order-accurate gradient of an N-dimensional scalar function.
+   
+    """ 
+    Calculate the fourth-order-accurate gradient of an N-dimensional scalar function.
     Uses central differences on the interior and first differences on boundaries
     to give the same shape.
     Inputs:
@@ -12,6 +14,7 @@ def gradientO4(f, *varargs):
     Outputs:
       N arrays of the same shape as f giving the derivative of f with respect
        to each dimension.
+
     """
     N = len (f.shape)  # number of dimensions
     n = len (varargs)
@@ -81,6 +84,10 @@ def gradientO4(f, *varargs):
 
 
 def gradientO4_fixed(f, dx):
+
+        """ 
+        Simplified version, it doesn't use the slice function anymore.
+        """
     f = np.asarray(f)
     n = len(f)
     out = np.zeros_like(f, dtype=float)
