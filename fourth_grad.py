@@ -85,9 +85,9 @@ def gradientO4(f, *varargs):
 
 def gradientO4_fixed(f, dx):
 
-        """ 
-        Simplified version, it doesn't use the slice function anymore.
-        """
+    """ 
+    Simplified version, it doesn't use the slice function anymore.
+    """
     f = np.asarray(f)
     n = len(f)
     out = np.zeros_like(f, dtype=float)

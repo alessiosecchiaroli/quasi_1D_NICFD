@@ -32,11 +32,11 @@ area = np.interp(x, x_old,area_old)
 dA = np.interp(x, x_old,dA_old)
 
 # Experiments conditions
-T0 = 250 # Celsius
-p0 = 16 #bar
+T0 = 220 # Celsius
+p0 = 12 #bar
 
 # Define the folder path based on experimental conditions
-folder_path = 'BOS_December_2025/random'
+folder_path = 'CO2_test'
 
 # Create the folder if it does not exist
 os.makedirs(folder_path, exist_ok=True)
@@ -48,7 +48,7 @@ p0 = p0 * 1E5 #Pascal
 # Fluid
 fluid = "REFPROP::MM"
 
-Z0 = cp.PropsSI('Z','T', T0,'P', p0, 'MM' )
+Z0 = cp.PropsSI('Z','T', T0,'P', p0, fluid )
 gamma0 = cp.PropsSI('CPMASS','T', T0,'P', p0, fluid )/cp.PropsSI('CVMASS','T', T0,'P', p0, fluid )
 R = 8.3125 # J/(K * mol)
 dens0, c0 = PVRT(T0, p0,fluid)
@@ -113,8 +113,8 @@ for i, a in enumerate(area):
     # # to help the solver reach the wanted solution
     # # if Mach is decreasing, start the search from supersonic conditions and lower p,T, gamma
 
-    if mach - MACH[i-1] < 0:
-        mach, pp, Rr, gammaa_pv = fsolve (mach_area_rel, [1.5, p[i-1]*0.9, rho[i-1]*0.9, gamma_pv[i-1]*0.9], args=(a), xtol=1e-16, maxfev=10000)
+    if mach - MACH[i-1] < 0: # force Mach to be higher than 1
+        mach, pp, Rr, gammaa_pv = fsolve (mach_area_rel, [2, p[i-1], rho[i-1], gamma_pv[i-1]], args=(a), xtol=1e-16, maxfev=10000)
 
     # gammaa = cp.PropsSI('CPMASS','T', Tt,'P', pp, fluid )/cp.PropsSI('CVMASS','T', Tt,'P', pp, fluid )
     MACH[i] = mach
@@ -140,96 +140,104 @@ x_step = x_to_int[1] - x_to_int[0]
 M_int = np.interp(x_to_int,x,MACH)
 A_int = np.interp(x_to_int,x,area)
 rho_int = np.interp(x_to_int,x,rho)
+c_int = np.interp(x_to_int,x,c)
+fluid_speed = u(M_int,c_int)
+
+
+mass_flow = rho_int * fluid_speed * A_int
+
+plt.plot(x_to_int,mass_flow)
+plt.show()
 
 # drho = diff(rho,x,"forward")
 # drho = np.gradient(rho_int,x_to_int,edge_order=1)
-drho = diff02(rho,x)
-drho_4 = gradientO4_fixed(rho_int,x_step)
+# drho = diff02(rho,x)
+# # drho_4 = gradientO4_fixed(rho_int,x_step)
 
 
 
-plt.plot(x*1000, -1*drho)
-plt.plot(x_to_int*1000, -1*drho_4)
-plt.ylabel('Density gradient [kg/m4]')
-plt.xlabel('Nozzle length [mm]')
-plt.grid(True)
-plt.savefig(os.path.join(folder_path, 'density_gradient_plot.pdf'), dpi=300, bbox_inches='tight')
-plt.show()
+# plt.plot(x*1000, -1*drho)
+# # plt.plot(x_to_int*1000, -1*drho_4)
+# plt.ylabel('Density gradient [kg/m4]')
+# plt.xlabel('Nozzle length [mm]')
+# plt.grid(True)
+# plt.savefig(os.path.join(folder_path, 'density_gradient_plot.pdf'), dpi=300, bbox_inches='tight')
+# plt.show()
 
-fluid_speed = u(MACH,c)
+# fluid_speed = u(MACH,c)
 
-plt.plot(x*1000, fluid_speed)
-plt.ylabel('Speed [m/s]')
-plt.xlabel('Nozzle length [mm]')
-plt.grid(True)
-plt.savefig(os.path.join(folder_path, 'velocity.pdf'), dpi=300, bbox_inches='tight')
-plt.show()
+# plt.plot(x*1000, fluid_speed)
+# plt.ylabel('Speed [m/s]')
+# plt.xlabel('Nozzle length [mm]')
+# plt.grid(True)
+# plt.savefig(os.path.join(folder_path, 'velocity.pdf'), dpi=300, bbox_inches='tight')
+# plt.show()
 
 
-plt.plot(M_int,A_star/A_int, label='A*/A')
-plt.plot(MACH,p/p0, label= 'p/p0')
-plt.plot(MACH,T/T0, label='T/T0')
-plt.plot(M_int,rho_int/dens0, label='rho/rho0')
-plt.plot(MACH,c/c0, label='c/c0')
-plt.legend()
-plt.xlabel('Mach')
-plt.grid(True)
-plt.savefig(os.path.join(folder_path, 'adimensional.pdf'), dpi=300, bbox_inches='tight')
-plt.show()
-
-# DIMENSIONAL RESULTS
-plt.figure(figsize=(16, 9))  # Adjust the size to fit your screen resolution
-plt.subplot(5,1,1)
-plt.plot(x*1000,MACH) #, label='M')
-plt.grid(True)
-plt.ylabel('Mach')
-plt.subplot(5,1,2)
-plt.plot(x*1000, p) #, label = 'p')
-plt.grid(True)
-plt.ylabel('Pressure [Pa]')
-plt.subplot(5,1,3)
-plt.plot(x*1000,T) #, label= 'T')
-plt.grid(True)
-plt.ylabel('Temperature [K]')
-plt.subplot(5,1,4)
-plt.plot(x*1000,rho) #, label = 'rho')
-plt.grid(True)
-plt.ylabel('Density [kg/m3]')
-plt.subplot(5,1,5)
-plt.plot(x*1000,gamma_pv)
-plt.grid(True)
-plt.ylabel('Gamma_pv')
+# plt.plot(M_int,A_star/A_int, label='A*/A')
+# plt.plot(MACH,p/p0, label= 'p/p0')
+# plt.plot(MACH,T/T0, label='T/T0')
+# plt.plot(M_int,rho_int/dens0, label='rho/rho0')
+# plt.plot(MACH,c/c0, label='c/c0')
 # plt.legend()
-plt.xlabel('Nozzle length [mm]')
+# plt.xlabel('Mach')
+# plt.grid(True)
+# plt.savefig(os.path.join(folder_path, 'adimensional.pdf'), dpi=300, bbox_inches='tight')
+# plt.show()
 
-# Adjust layout to prevent overlapping
-plt.tight_layout()
+# # DIMENSIONAL RESULTS
+# plt.figure(figsize=(16, 9))  # Adjust the size to fit your screen resolution
+# plt.subplot(5,1,1)
+# plt.plot(x*1000,MACH) #, label='M')
+# plt.grid(True)
+# plt.ylabel('Mach')
+# plt.subplot(5,1,2)
+# plt.plot(x*1000, p) #, label = 'p')
+# plt.grid(True)
+# plt.ylabel('Pressure [Pa]')
+# plt.subplot(5,1,3)
+# plt.plot(x*1000,T) #, label= 'T')
+# plt.grid(True)
+# plt.ylabel('Temperature [K]')
+# plt.subplot(5,1,4)
+# plt.plot(x*1000,rho) #, label = 'rho')
+# plt.grid(True)
+# plt.ylabel('Density [kg/m3]')
+# plt.subplot(5,1,5)
+# plt.plot(x*1000,gamma_pv)
+# plt.grid(True)
+# plt.ylabel('Gamma_pv')
+# # plt.legend()
+# plt.xlabel('Nozzle length [mm]')
 
-plt.savefig(os.path.join(folder_path, 'subplots.pdf'), dpi=300, bbox_inches='tight')
-plt.show()
+# # Adjust layout to prevent overlapping
+# plt.tight_layout()
+
+# plt.savefig(os.path.join(folder_path, 'subplots.pdf'), dpi=300, bbox_inches='tight')
+# plt.show()
 
 
-# Save the NumPy variable inside the folder
-np.save(os.path.join(folder_path, 'x_coordinates.npy'), x)
-np.save(os.path.join(folder_path, 'Density'), rho)
-np.save(os.path.join(folder_path, 'Mach'), MACH)
-np.save(os.path.join(folder_path, 'Pressure'), p)
-np.save(os.path.join(folder_path, 'Temperature'), T)
-np.save(os.path.join(folder_path, 'Area'), area)
-np.save(os.path.join(folder_path, 'Speed'), fluid_speed)
-np.save(os.path.join(folder_path, 'Gamma'), gamma)
-np.save(os.path.join(folder_path, 'Gamma_pv'), gamma_pv)
-np.save(os.path.join(folder_path, 'c'), c)
+# # Save the NumPy variable inside the folder
+# np.save(os.path.join(folder_path, 'x_coordinates.npy'), x)
+# np.save(os.path.join(folder_path, 'Density'), rho)
+# np.save(os.path.join(folder_path, 'Mach'), MACH)
+# np.save(os.path.join(folder_path, 'Pressure'), p)
+# np.save(os.path.join(folder_path, 'Temperature'), T)
+# np.save(os.path.join(folder_path, 'Area'), area)
+# np.save(os.path.join(folder_path, 'Speed'), fluid_speed)
+# np.save(os.path.join(folder_path, 'Gamma'), gamma)
+# np.save(os.path.join(folder_path, 'Gamma_pv'), gamma_pv)
+# np.save(os.path.join(folder_path, 'c'), c)
 
-np.save(os.path.join(folder_path, 'M_int'), M_int)
-np.save(os.path.join(folder_path, 'A_int'), A_int)
-np.save(os.path.join(folder_path, 'A_star'), A_star)
-np.save(os.path.join(folder_path, 'rho_int'), rho_int)
-np.save(os.path.join(folder_path, 'dens0'), dens0)
-np.save(os.path.join(folder_path, 'c0'), c0)
-np.save(os.path.join(folder_path, 'p0'), p0)
-np.save(os.path.join(folder_path, 'T0'), T0)
-np.save(os.path.join(folder_path, 'Z0'), Z0)
+# np.save(os.path.join(folder_path, 'M_int'), M_int)
+# np.save(os.path.join(folder_path, 'A_int'), A_int)
+# np.save(os.path.join(folder_path, 'A_star'), A_star)
+# np.save(os.path.join(folder_path, 'rho_int'), rho_int)
+# np.save(os.path.join(folder_path, 'dens0'), dens0)
+# np.save(os.path.join(folder_path, 'c0'), c0)
+# np.save(os.path.join(folder_path, 'p0'), p0)
+# np.save(os.path.join(folder_path, 'T0'), T0)
+# np.save(os.path.join(folder_path, 'Z0'), Z0)
 
 # plt.plot(x*1000, gamma)
 # plt.show()

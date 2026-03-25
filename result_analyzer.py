@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import os 
 import seaborn as sns
+from matplotlib.lines import Line2D
+from scipy.signal import savgol_filter
 
 '''
 This file use pandas and seaborn to perform data analysis of the results obtained from "Main_v1.py"
@@ -105,16 +107,19 @@ for name in data.keys():
 
 csv_version = pd.DataFrame(rows)
 
-csv_version['norm_density'] = csv_version['Density'] / csv_version['dens0']
+csv_version['norm_density'] = csv_version['Density'] / csv_version.groupby('Folder')['Density'].transform('first')
 csv_version['norm_temperature'] = csv_version['Temperature'] / csv_version.groupby('Folder')['Temperature'].transform('first')
 csv_version['norm_pressure'] = csv_version['Pressure'] / csv_version.groupby('Folder')['Pressure'].transform('first')
 
-csv_version['norm_dens_grad'] = (csv_version.groupby('Folder')['Density'].diff() / csv_version.groupby('Folder')['x_coordinates'].diff())/csv_version.groupby('Folder')['dens0'].transform('first')  # Calculate density gradient for each folder
+csv_version['norm_dens_grad'] = (csv_version.groupby('Folder')['Density'].diff() / csv_version.groupby('Folder')['x_coordinates'].diff())/csv_version.groupby('Folder')['Density'].transform('first')  # Calculate density gradient for each folder
 csv_version['norm_p_grad'] = (csv_version.groupby('Folder')['Pressure'].diff() / csv_version.groupby('Folder')['x_coordinates'].diff())/csv_version.groupby('Folder')['Pressure'].transform('first')  # Calculate pressure gradient for each folder
 csv_version['norm_T_grad'] = (csv_version.groupby('Folder')['Temperature'].diff() / csv_version.groupby('Folder')['x_coordinates'].diff())/csv_version.groupby('Folder')['Temperature'].transform('first')  # Calculate temperature gradient for each folder
 
 csv_version['beta'] = csv_version.groupby('Folder')['Pressure'].transform('first')/csv_version.groupby('Folder')['Pressure'].transform('last') 
 csv_version['alfa'] = csv_version.groupby('Folder')['Density'].transform('first')/csv_version.groupby('Folder')['Density'].transform('last')
+
+csv_version['mean_gamma_pv'] = csv_version.groupby('Folder')['Gamma_pv'].transform('mean')
+
 
 for name in csv_version['Folder'].unique():
 
@@ -126,40 +131,54 @@ for name in csv_version['Folder'].unique():
 # save the compiled data to a csv file
 csv_version.to_csv(os.path.join(root_folder, 'compiled_data.csv'), index=False)
 
-plt.figure()
-plt.subplot(1,2,1)
-sns.lineplot(data=csv_version, x='x_coordinates',y='norm_pressure')
-sns.lineplot(data=csv_version, x='x_coordinates',y='norm_density',
-    estimator=None,
-    units='Folder',
-    lw=1
-)
-sns.lineplot(data=csv_version, x='x_coordinates',y='norm_temperature')
-
+# plt.figure()
+# plt.subplot(1,2,1)
+# sns.lineplot(data=csv_version, x='x_coordinates',y='norm_pressure',errorbar=(lambda x: (x.min(), x.max())))
+# sns.lineplot(data=csv_version, x='x_coordinates',y='norm_density',errorbar=(lambda x: (x.min(), x.max())))
+# sns.lineplot(data=csv_version, x='x_coordinates',y='norm_temperature',errorbar=(lambda x: (x.min(), x.max())))
+# plt.show()
 ## --- PLOT THE NORMALIZED TRENDS OF p,T, rho
-# plt.figure(figsize=(10, 6))
+# plt.figure()
 
-plt.subplot(1,2,2)
-sns.lineplot(data=csv_version, x='x_coordinates', y='norm_density', hue='Folder',linestyle='-')
-sns.lineplot(data=csv_version, x='x_coordinates', y='norm_pressure', hue='Folder', linestyle='--')
-sns.lineplot(data=csv_version, x='x_coordinates', y='norm_temperature', hue='Folder', linestyle='-.')
-plt.title('Normalized variables vs x_coordinates')
+# # plt.subplot(2,1,1)
+# sns.lineplot(data=csv_version, x='x_coordinates', y='norm_density', hue='mean_gamma_pv',linestyle='-')
+# sns.lineplot(data=csv_version, x='x_coordinates', y='norm_pressure', hue='mean_gamma_pv', linestyle='--')
+# sns.lineplot(data=csv_version, x='x_coordinates', y='norm_temperature', hue='mean_gamma_pv', linestyle='-.')
+# plt.title('Normalized variables vs x_coordinates')
+# plt.title('Normalized Gamma_pv vs x_coordinates for Different Folders')
+# plt.xlabel('x_coordinates [mm]')
+# # Remove the automatic legend
+# plt.legend().remove()
+# plt.ylabel('Normalized variables')
+# plt.legend()
+
+
+# custom_lines = [
+#     Line2D([0], [0], color='black', linestyle='-'),
+#     Line2D([0], [0], color='black', linestyle='--'),
+#     Line2D([0], [0], color='black', linestyle='-.')
+# ]
+
+# plt.legend(custom_lines, ['Density', 'Pressure', 'Temperature'])
+
+# plt.subplot(2,1,2)
+plt.figure()
+# sns.lineplot(data=csv_version, x='x_coordinates', y=savgol_filter(csv_version['norm_dens_grad'],30,3), hue='mean_gamma_pv',linestyle='-')
+# sns.lineplot(data=csv_version, x='x_coordinates', y=savgol_filter(csv_version['norm_p_grad'],30,3), hue='mean_gamma_pv', linestyle='--')
+# sns.lineplot(data=csv_version, x='x_coordinates', y='norm_T_grad', hue='mean_gamma_pv', linestyle='-.')
+
+sns.lineplot(data=csv_version, x='x_coordinates', y=savgol_filter(csv_version['norm_dens_grad'],30,3),errorbar=(lambda x: (x.min(), x.max())),linestyle='-',label=r'$\rho$')
+sns.lineplot(data=csv_version, x='x_coordinates', y=savgol_filter(csv_version['norm_p_grad'],30,3),errorbar=(lambda x: (x.min(), x.max())), linestyle='--',label='p')
+sns.lineplot(data=csv_version, x='x_coordinates', y='norm_T_grad',errorbar=(lambda x: (x.min(), x.max())),linestyle='-.',label='T')
+
+plt.title('Normalized gradients vs x_coordinates')
 # plt.title('Normalized Gamma_pv vs x_coordinates for Different Folders')
 plt.xlabel('x_coordinates [mm]')
 # # Remove the automatic legend
-plt.legend().remove()
-plt.ylabel('Normalized variables')
+# plt.legend().remove()
+plt.ylabel('Normalized gradients')
+plt.legend()
 
-# Add your custom legend
-from matplotlib.lines import Line2D
-
-custom_lines = [
-    Line2D([0], [0], color='black', linestyle='-'),
-    Line2D([0], [0], color='black', linestyle='--'),
-    Line2D([0], [0], color='black', linestyle='-.')
-]
-
-plt.legend(custom_lines, ['Density', 'Pressure', 'Temperature'])
 
 plt.show()
 

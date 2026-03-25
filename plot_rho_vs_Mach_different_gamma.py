@@ -48,7 +48,7 @@ def rho(rho0,M,gamma):
 
 Mach = np.load('BOS_December_2025/BOS_12_5_1/Mach.npy')
 # Mach = np.linspace(0,10,1000)
-gamma = np.linspace(0.4,1.5,13)
+gamma = np.linspace(0.4,0.99,10)
 
 plt.figure()
 
