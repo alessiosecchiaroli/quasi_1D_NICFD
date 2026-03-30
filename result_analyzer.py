@@ -64,10 +64,19 @@ for name, path in folder.items():
         data[name]['Mach'] = np.load(os.path.join(path, 'M_arr.npy'))
         data[name]['c'] = np.load(os.path.join(path, 'c_arr.npy'))
         data[name]['dens0'] = np.load(os.path.join(path, 'dens0.npy'))
-        # data[name]['T0'] = np.load(os.path.join(path, 'T0.npy'))
-        # data[name]['P0'] = np.load(os.path.join(path, 'P0.npy'))
-        # data[name]['c0'] = np.load(os.path.join(path, 'c0.npy'))
-        # data[name]['Z0'] = np.load(os.path.join(path, 'Z0.npy'))
+        data[name]['area'] = np.load(os.path.join(path,'area.npy'))
+
+        # data[name]['x_coordinates'] = np.load(os.path.join(path, 'x_coordinates.npy'))
+        # data[name]['Gamma_pv'] = np.load(os.path.join(path, 'Gamma_pv.npy'))
+        # data[name]['Density'] = np.load(os.path.join(path, 'Density.npy'))
+        # data[name]['Temperature'] = np.load(os.path.join(path, 'Temperature.npy'))
+        # data[name]['Pressure'] = np.load(os.path.join(path, 'Pressure.npy'))
+        # data[name]['Velocity'] = np.load(os.path.join(path, 'Speed.npy'))
+        # data[name]['Mach'] = np.load(os.path.join(path, 'Mach.npy'))
+        # data[name]['c'] = np.load(os.path.join(path, 'c.npy'))
+        # data[name]['dens0'] = np.load(os.path.join(path, 'dens0.npy'))
+        # data[name]['area'] = np.load(os.path.join(path,'Area.npy'))
+
         print(f"Loaded files for {name}")
     except FileNotFoundError as e:
         print(f"File not found in {name}: {e}")
@@ -87,6 +96,7 @@ for name in data.keys():
         Mach = data[name]['Mach']
         c = data[name]['c']
         velocity = data[name]['Velocity']
+        area = data[name]['area']
         # Assume x_coords, gamma_pv, density are arrays of same length, dens0 is scalar
         dens0_val = dens0.item() if dens0.ndim == 0 else dens0[0]
 
@@ -102,7 +112,8 @@ for name in data.keys():
                 'Mach': Mach[i],
                 'Speed': velocity[i],
                 'c': c[i],
-                'dens0': dens0_val
+                'dens0': dens0_val,
+                'area' : area[i]
             })
 
 csv_version = pd.DataFrame(rows)
